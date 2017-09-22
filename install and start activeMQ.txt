@@ -1,0 +1,66 @@
+- setup activemq 
+1. update base system : 
+- yum -y update
+2. install java 
+- wget --no-cookies --no-check-certificate --header "Cookie:oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.rpm"
+- yum -y localinstall jdk-8u131-linux-x64.rpm
+- java -version
+3. check variable environment if null setup
+- echo $JAVA_HOME
+- yum install nano
+- nano ~/.bash_profile 
+- add 2 lines at the end of the file:
+export JAVA_HOME=/usr/java/jdk1.8.0_131/
+export JRE_HOME=/usr/java/jdk1.8.0_131/jre
+- source ~/.bash_profile
+- echo $JAVA_HOME 
+4. install ActiveMQ
+- wget http://www.us.apache.org/dist/activemq/5.13.5/apache-activemq-5.13.5-bin.tar.gz
+- extract the file in folder /var
+tar -zxvf apache-activemq-*-bin.tar.gz -C /var
+- change name folder
+ mv /var/apache-activemq-*/ /var/activemq/
+5. Starting ActiveMQ
+- cd /var/activemq
+- start activeMQ with console and stop ctr+C
+./bin/activemq console
+- start with service
+./bin/activemq start
+- stop activeMQ
+./bin/activemq stop
+6. created systemd service
+- nano /etc/systemd/system/activemq.service
+[Unit]
+Description=ActiveMQ service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/var/activemq/bin/activemq start
+ExecStop=/var/activemq/bin/activemq stop
+User=root
+Group=root
+Restart=always
+RestartSec=9
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=activemq
+
+[Install]
+WantedBy=multi-user.target
+- start activeMQ with service 
+systemctl start activemq
+- check status 
+systemctl status activemq
+- To configure ActiveMQ to automatically start at boot time (when start server) use
+systemctl enable activemq
+
+7. using admin web panel
+http://Your_Server_IP:8161/admin 
+IF web not run 
+- firewall-cmd --zone=public --permanent --add-port=8161/tcp
+- firewall-cmd --reload
+OR you should stop firewalld
+systemctl stop firewalld
+login with admin/admin. you can change pass when you login
+apache-activemq-5.9.1/conf/jetty-realm.properties. 
